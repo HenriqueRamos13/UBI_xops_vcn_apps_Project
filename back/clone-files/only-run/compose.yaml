@@ -1,0 +1,17 @@
+version: "3"
+services:
+  api:
+    image: hramos13/xops-project-back:latest
+    ports:
+      - 3001:3001
+    restart: always
+    environment:
+      JWT_SECRET: 1234567899oiuywriufbdsfldsv
+
+  # web:
+  #   image: hramos13/xops-project-front:latest
+  #   ports:
+  #     - 3000:3000
+  #   depends_on:
+  #     - api
+  #   restart: always
