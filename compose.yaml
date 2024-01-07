@@ -11,6 +11,17 @@ services:
     volumes:
       - ./back:/app
 
+  app:
+    build:
+      context: ./app
+    ports:
+      - "9000:9000"
+    depends_on:
+      - api
+    restart: always
+    volumes:
+      - ./app:/app
+
   # web:
   #   build:
   #     context: ./front
