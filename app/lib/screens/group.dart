@@ -5,7 +5,6 @@ import '../providers/auth.dart';
 import 'package:app/models.dart';
 import 'dart:convert';
 import '../constants.dart';
-import '../providers/auth.dart';
 
 class GroupScreen extends StatefulWidget {
   @override
@@ -13,7 +12,18 @@ class GroupScreen extends StatefulWidget {
 }
 
 class _GroupScreenState extends State<GroupScreen> {
-  late Group _group;
+  late Group _group = Group(
+    id: '',
+    name: '',
+    description: '',
+    tasks: [],
+    owner: User(
+      id: '',
+      name: '',
+      email: '',
+      password: '',
+    ),
+  );
 
   @override
   void initState() {
@@ -73,7 +83,7 @@ class _GroupScreenState extends State<GroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_group.name ?? 'Group'),
+        title: Text(_group?.name ?? 'Group'),
       ),
       body: _group != null
           ? ListView.builder(
@@ -86,7 +96,6 @@ class _GroupScreenState extends State<GroupScreen> {
                   subtitle: Text(
                       'Status: ${task.status}, Completed: ${task.completed}'),
                   onTap: () {
-                    // Ao clicar em uma tarefa, navegue para a página da tarefa
                     _navigateToTask(task.id);
                   },
                 );
@@ -95,6 +104,13 @@ class _GroupScreenState extends State<GroupScreen> {
           : Center(
               child: CircularProgressIndicator(),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/create_task',
+              arguments: {'groupId': _group.id});
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 }

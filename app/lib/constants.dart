@@ -1,3 +1,3 @@
 class Constants {
-  static const String apiUrl = 'http://localhost:3001/v1';
+  static const String apiUrl = 'https://ubi-trabalho.oa.r.appspot.com/v1';
 }

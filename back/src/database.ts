@@ -3,7 +3,6 @@ export type User = {
   name: string;
   email: string;
   password: string;
-  createdAt: Date;
 };
 
 export type Task = {
@@ -13,7 +12,6 @@ export type Task = {
   status: "TODO" | "DOING" | "DONE";
   completed: boolean;
   owner: User;
-  createdAt: Date;
 };
 
 export type Group = {
@@ -22,7 +20,6 @@ export type Group = {
   description: string;
   tasks: Task[];
   owner: User;
-  createdAt: Date;
 };
 
 export type Db = {

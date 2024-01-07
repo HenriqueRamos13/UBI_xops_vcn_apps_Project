@@ -3,23 +3,20 @@ class User {
   final String name;
   final String email;
   final String password;
-  final DateTime createdAt;
 
   User({
     required this.id,
     required this.name,
     required this.email,
     required this.password,
-    required this.createdAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      password: json['password'],
-      createdAt: DateTime.parse(json['createdAt']),
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      password: json['password'] ?? '',
     );
   }
 }
@@ -30,8 +27,8 @@ class Task {
   final String? description;
   final String status;
   final bool completed;
-  final User owner;
-  final DateTime createdAt;
+  final String
+      owner; // Alterado para String assumindo que é a referência ao id do usuário
 
   Task({
     required this.id,
@@ -40,18 +37,16 @@ class Task {
     required this.status,
     required this.completed,
     required this.owner,
-    required this.createdAt,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
-      id: json['id'],
-      name: json['name'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
       description: json['description'],
-      status: json['status'],
-      completed: json['completed'],
-      owner: User.fromJson(json['owner']),
-      createdAt: DateTime.parse(json['createdAt']),
+      status: json['status'] ?? '',
+      completed: json['completed'] ?? false,
+      owner: json['owner'] ?? '',
     );
   }
 }
@@ -62,7 +57,6 @@ class Group {
   final String description;
   final List<Task> tasks;
   final User owner;
-  final DateTime createdAt;
 
   Group({
     required this.id,
@@ -70,18 +64,18 @@ class Group {
     required this.description,
     required this.tasks,
     required this.owner,
-    required this.createdAt,
   });
 
   factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
       tasks:
           (json['tasks'] as List).map((task) => Task.fromJson(task)).toList(),
-      owner: User.fromJson(json['owner']),
-      createdAt: DateTime.parse(json['createdAt']),
+      owner: json['owner'] is String
+          ? User(id: json['owner'], name: '', email: '', password: '')
+          : User.fromJson(json['owner']),
     );
   }
 }

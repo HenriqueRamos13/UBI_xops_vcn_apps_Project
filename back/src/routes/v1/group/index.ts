@@ -74,7 +74,6 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
       const group = {
         id: uuidv4(),
         ...request.body,
-        createdAt: new Date(),
         tasks: [],
         owner: request.user.id,
       } as Group;
@@ -111,7 +110,7 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
 
     reply.send(updatedGroup);
   });
-  fastify.delete("/group", async (request: RequestDelete, reply) => {
+  fastify.delete("/group/:id", async (request: RequestDelete, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;

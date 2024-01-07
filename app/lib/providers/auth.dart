@@ -16,7 +16,8 @@ class AuthProvider with ChangeNotifier {
       BuildContext context, String email, String password) async {
     final response = await http.post(
       Uri.parse('${Constants.apiUrl}/auth'),
-      body: {'email': email, 'password': password},
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
     );
 
     if (response.statusCode == 200) {
@@ -36,10 +37,15 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> register(
       BuildContext context, String name, String email, String password) async {
+    print('register');
+
     final response = await http.post(
       Uri.parse('${Constants.apiUrl}/signup'),
-      body: {'name': name, 'email': email, 'password': password},
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name, 'email': email, 'password': password}),
     );
+
+    print(response.body);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

@@ -30,7 +30,6 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
       email,
       password: hash,
       name,
-      createdAt: new Date(),
     });
 
     if (user) {

@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
           '/register': (context) => RegisterScreen(),
           '/login': (context) => LoginScreen(),
           '/group': (context) => authMiddleware(context, GroupScreen()),
+          '/home': (context) => authMiddleware(context, HomeScreen()),
           '/create_group': (context) =>
               authMiddleware(context, CreateGroupScreen()),
           '/create_task': (context) {

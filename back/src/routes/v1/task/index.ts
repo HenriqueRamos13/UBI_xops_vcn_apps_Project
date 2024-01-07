@@ -142,7 +142,7 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
 
     reply.send(updatedTask);
   });
-  fastify.delete("/task", async (request: RequestDelete, reply) => {
+  fastify.delete("/task/:id", async (request: RequestDelete, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;

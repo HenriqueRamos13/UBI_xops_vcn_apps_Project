@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
+import 'dart:convert';
 
 class CreateGroupScreen extends StatefulWidget {
   @override
@@ -69,8 +70,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     // Faça a requisição com o token no cabeçalho
     final response = await http.post(
       Uri.parse('${Constants.apiUrl}/group'),
-      headers: {'Authorization': 'Bearer $token'},
-      body: {'name': name, 'description': description},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({'name': name, 'description': description}),
     );
 
     if (response.statusCode == 200) {
