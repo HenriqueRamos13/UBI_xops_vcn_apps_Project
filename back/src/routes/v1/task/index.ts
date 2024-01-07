@@ -127,6 +127,19 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
       task.id === request.params.id ? updatedTask : task
     );
 
+    DB.groups = DB.groups.map((group) => {
+      if (group.owner === request.user.id) {
+        return {
+          ...group,
+          tasks: group.tasks.map((task) =>
+            task.id === request.params.id ? updatedTask : task
+          ),
+        };
+      }
+
+      return group;
+    });
+
     reply.send(updatedTask);
   });
   fastify.delete("/task", async (request: RequestDelete, reply) => {
