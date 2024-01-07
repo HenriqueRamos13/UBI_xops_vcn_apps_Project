@@ -78,7 +78,7 @@ server.get("/ping", async (request, reply) => {
   return "pong\n";
 });
 
-const PORT: number = process.env.PORT ? Number(process.env.PORT) : 3001;
+const PORT: number = process.env.PORT ? Number(process.env.PORT) : 8080;
 
 server.listen({ port: PORT, host: "0.0.0.0" }, (err, address) => {
   if (err) {

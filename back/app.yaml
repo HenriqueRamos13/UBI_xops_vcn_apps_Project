@@ -4,12 +4,6 @@ env_variables:
   NODE_ENV: "production"
   JWT_SECRET: "1234567899oiuywriufbdsfldsv"
 
+instance_class: F1
 automatic_scaling:
-  target_cpu_utilization: 0.65
-  min_instances: 1
   max_instances: 1
-
-resources:
-  cpu: 0.5
-  memory_gb: 0.6
-  disk_size_gb: 10
