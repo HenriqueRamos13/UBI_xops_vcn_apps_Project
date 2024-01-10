@@ -25,7 +25,7 @@ class AuthProvider with ChangeNotifier {
       await storage.write(key: 'token', value: data['token']);
       _isAuthenticated = true;
       notifyListeners();
-      navigateToHome(context); // Passa o contexto para a função
+      navigateToHome(context);
     } else {
       throw Exception('Failed to load data');
     }
@@ -35,17 +35,21 @@ class AuthProvider with ChangeNotifier {
     return await storage.read(key: 'token');
   }
 
+  Future<void> checkAuthentication() async {
+    final token = await getToken();
+    if (token != null) {
+      _isAuthenticated = true;
+      notifyListeners();
+    }
+  }
+
   Future<void> register(
       BuildContext context, String name, String email, String password) async {
-    print('register');
-
     final response = await http.post(
       Uri.parse('${Constants.apiUrl}/signup'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'name': name, 'email': email, 'password': password}),
     );
-
-    print(response.body);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
