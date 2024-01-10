@@ -28,7 +28,7 @@ jobs:
       - name: Build and push to Dockerhub
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./back
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/xops-project-back:latest
           labels: ${{ steps.meta.outputs.labels }}
