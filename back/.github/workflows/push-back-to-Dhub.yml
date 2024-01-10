@@ -1,8 +1,8 @@
 name: Push Back docker image to Dockerhub
 
 on:
-  push: 
-    branches: 
+  push:
+    branches:
       - main
 
 jobs:
@@ -18,18 +18,17 @@ jobs:
         with:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-      
+
       - name: Extract metadata (tags, labels) from Docker
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/game-project-back:latest
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/xops-project-back:latest
 
       - name: Build and push to Dockerhub
         uses: docker/build-push-action@v3
-        with:  
+        with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/game-project-back:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/xops-project-back:latest
           labels: ${{ steps.meta.outputs.labels }}
-
