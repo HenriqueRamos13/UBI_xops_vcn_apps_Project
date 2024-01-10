@@ -43,6 +43,31 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> logout(BuildContext context) async {
+    final token = await getToken();
+
+    if (token != null) {
+      final response = await http.delete(
+        Uri.parse('${Constants.apiUrl}/auth'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await storage.delete(key: 'token');
+
+        _isAuthenticated = false;
+        notifyListeners();
+
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        throw Exception('Failed to logout');
+      }
+    }
+  }
+
   Future<void> register(
       BuildContext context, String name, String email, String password) async {
     final response = await http.post(
