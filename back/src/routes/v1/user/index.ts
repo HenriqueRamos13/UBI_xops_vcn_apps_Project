@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
-import DB from "../../../database";
 
 type RequestGet = FastifyRequest<{}>;
 
@@ -8,8 +7,6 @@ type RequestGetOne = FastifyRequest<{
     id: string;
   };
 }>;
-
-type RequestPost = FastifyRequest<{}>;
 
 type RequestPatch = FastifyRequest<{
   Params: {
@@ -28,26 +25,31 @@ type RequestDelete = FastifyRequest<{
   };
 }>;
 
-export default function (fastify: FastifyInstance, opts: any, done: any) {
+export default async function (fastify: FastifyInstance, opts: any, done: any) {
   fastify.get("/user", async (request: RequestGet, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const users = DB.users.filter((user) => user.id === request.user.id);
+    const users = await fastify.prisma.user.findMany({
+      where: { id: request.user.id },
+    });
 
     reply.send(users);
   });
+
   fastify.get("/user/:id", async (request: RequestGetOne, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const user = DB.users.find(
-      (user) => user.id === request.params.id && user.id === request.user.id
-    );
+    const user = await fastify.prisma.user.findFirst({
+      where: {
+        id: request.params.id,
+      },
+    });
 
     if (!user) {
       reply.code(404).send({ error: "User not found" });
@@ -56,51 +58,36 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
 
     reply.send(user);
   });
-  //   fastify.post("/user", async (request: RequestPost, reply) => {});
+
   fastify.patch("/user/:id", async (request: RequestPatch, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const user = DB.users.find(
-      (user) => user.id === request.params.id && user.id === request.user.id
-    );
-
-    if (!user) {
-      reply.code(404).send({ error: "User not found" });
-      return;
-    }
-
-    const updatedUser = {
-      ...user,
-      ...request.body,
-    };
-
-    DB.users = DB.users.map((user) =>
-      user.id === request.params.id ? updatedUser : user
-    );
+    const updatedUser = await fastify.prisma.user.update({
+      where: {
+        id: request.params.id,
+      },
+      data: request.body,
+    });
 
     reply.send(updatedUser);
   });
-  fastify.delete("/user", async (request: RequestDelete, reply) => {
+
+  fastify.delete("/user/:id", async (request: RequestDelete, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const user = DB.users.find(
-      (user) => user.id === request.params.id && user.id === request.user.id
-    );
+    const deletedUser = await fastify.prisma.user.delete({
+      where: {
+        id: request.params.id,
+      },
+    });
 
-    if (!user) {
-      reply.code(404).send({ error: "User not found" });
-      return;
-    }
-
-    DB.users = DB.users.filter((user) => user.id !== request.params.id);
-
-    reply.send(user);
+    reply.send(deletedUser);
   });
 
   done();

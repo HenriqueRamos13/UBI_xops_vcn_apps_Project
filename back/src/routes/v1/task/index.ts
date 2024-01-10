@@ -1,6 +1,4 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
-import DB, { Task } from "../../../database";
-import { v4 as uuidv4 } from "uuid";
 
 type RequestGet = FastifyRequest<{}>;
 
@@ -33,26 +31,32 @@ type RequestDelete = FastifyRequest<{
   };
 }>;
 
-export default function (fastify: FastifyInstance, opts: any, done: any) {
+export default async function (fastify: FastifyInstance, opts: any, done: any) {
   fastify.get("/task", async (request: RequestGet, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const tasks = DB.tasks.filter((task) => task.owner === request.user.id);
+    const tasks = await fastify.prisma.task.findMany({
+      where: { ownerId: request.user.id },
+    });
 
     reply.send(tasks);
   });
+
   fastify.get("/task/:id", async (request: RequestGetOne, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const task = DB.tasks.find(
-      (task) => task.id === request.params.id && task.owner === request.user.id
-    );
+    const task = await fastify.prisma.task.findFirst({
+      where: {
+        id: request.params.id,
+        ownerId: request.user.id,
+      },
+    });
 
     if (!task) {
       reply.code(404).send({ error: "Task not found" });
@@ -61,68 +65,56 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
 
     reply.send(task);
   });
+
   fastify.post("/task", async (request: RequestPost, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const newTask = {
-      id: uuidv4(),
-      ...request.body,
-      status: "TODO",
-      completed: false,
-      owner: request.user.id,
-    } as Task;
-
-    DB.tasks.push(newTask);
+    const newTask = await fastify.prisma.task.create({
+      data: {
+        name: request.body.name,
+        status: "TODO",
+        completed: false,
+        ownerId: request.user.id,
+      },
+    });
 
     reply.send(newTask);
   });
+
   fastify.patch("/task/:id", async (request: RequestPatch, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const task = DB.tasks.find(
-      (task) => task.id === request.params.id && task.owner === request.user.id
-    );
-
-    if (!task) {
-      reply.code(404).send({ error: "Task not found" });
-      return;
-    }
-
-    const updatedTask = {
-      ...task,
-      ...request.body,
-    };
-
-    DB.tasks = DB.tasks.map((task) =>
-      task.id === request.params.id ? updatedTask : task
-    );
+    const updatedTask = await fastify.prisma.task.update({
+      where: {
+        id: request.params.id,
+        ownerId: request.user.id,
+      },
+      data: request.body,
+    });
 
     reply.send(updatedTask);
   });
+
   fastify.delete("/task/:id", async (request: RequestDelete, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
       return;
     }
 
-    const task = DB.tasks.find(
-      (task) => task.id === request.params.id && task.owner === request.user.id
-    );
+    const deletedTask = await fastify.prisma.task.delete({
+      where: {
+        id: request.params.id,
+        ownerId: request.user.id,
+      },
+    });
 
-    if (!task) {
-      reply.code(404).send({ error: "Task not found" });
-      return;
-    }
-
-    DB.tasks = DB.tasks.filter((task) => task.id !== request.params.id);
-
-    reply.send(task);
+    reply.send(deletedTask);
   });
 
   done();

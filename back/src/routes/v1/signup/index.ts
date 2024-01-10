@@ -1,7 +1,5 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import * as bcrypt from "bcryptjs";
-import DB from "../../../database";
-import { v4 as uuidv4 } from "uuid";
 
 type Request = FastifyRequest<{
   Body: {
@@ -16,7 +14,11 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
   fastify.post("/signup", async (request: Request, reply) => {
     const { email, password, name } = request.body;
 
-    const userExists = DB.users.find((user) => user.email === email);
+    const userExists = await fastify.prisma.user.findFirst({
+      where: {
+        email,
+      },
+    });
 
     if (userExists) {
       reply.code(400).send({ message: "User already exists" });
@@ -25,11 +27,12 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    const user = DB.users.push({
-      id: uuidv4(),
-      email,
-      password: hash,
-      name,
+    const user = await fastify.prisma.user.create({
+      data: {
+        email,
+        password: hash,
+        name,
+      },
     });
 
     if (user) {

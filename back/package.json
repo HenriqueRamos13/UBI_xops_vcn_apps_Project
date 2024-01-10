@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node ./dist/index.js",
-    "gcp-build": "tsc -p .",
+    "gcp-build": "npx prisma generate && tsc -p .",
     "dev": "npx ts-node-dev --no-notify src/index.ts"
   },
   "engines": {
@@ -16,17 +16,18 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/auth": "^4.4.0",
+    "@fastify/cookie": "^9.2.0",
+    "@fastify/cors": "^8.4.1",
     "@fastify/jwt": "^7.2.4",
+    "@fastify/rate-limit": "^9.0.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.3.1",
     "fastify": "^4.24.3",
     "fastify-plugin": "^4.5.1",
+    "fastify-prisma-client": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
     "pino": "^8.16.2",
-    "uuid": "^9.0.1",
-    "@fastify/cookie": "^9.2.0",
-    "@fastify/cors": "^8.4.1",
-    "@fastify/rate-limit": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -5,6 +5,7 @@ import cors from "@fastify/cors";
 import type { FastifyCookieOptions } from "@fastify/cookie";
 import cookie from "@fastify/cookie";
 import rateLimit from "@fastify/rate-limit";
+import fastifyPrismaClient from "fastify-prisma-client";
 dotenv.config();
 
 const serverOpts: FastifyServerOptions =
@@ -66,6 +67,8 @@ server.decorateRequest("isAuthenticated", async function () {
     return false;
   }
 });
+
+server.register(fastifyPrismaClient);
 
 server.register(require("./routes/v1/signup"), { prefix: "/v1" });
 server.register(require("./routes/v1/auth"), { prefix: "/v1" });
