@@ -18,95 +18,95 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Container(
-        color: stBGColor,
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Image.asset(
-              'assets/images/logo.png',
-              height: 200,
-            ),
-            RichText(
-              text: TextSpan(
-                children: <TextSpan>[
-                  TextSpan(
-                      text: 'snap',
+      body: SingleChildScrollView(
+        child: Container(
+          color: stBGColor,
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(height: 60),
+              Image.asset(
+                'assets/images/logo.png',
+                height: 200,
+              ),
+              RichText(
+                text: TextSpan(
+                  children: <TextSpan>[
+                    TextSpan(
+                        text: 'snap',
+                        style: TextStyle(
+                          color: stLightPurple,
+                          fontSize: 40,
+                          fontWeight: FontWeight.normal,
+                        )),
+                    TextSpan(
+                      text: 'Task',
                       style: TextStyle(
-                        color: stLightPurple,
+                        color: stDarkerPurple,
                         fontSize: 40,
-                        fontWeight: FontWeight.normal,
-                      )),
-                  TextSpan(
-                    text: 'Task',
-                    style: TextStyle(
-                      color: stDarkerPurple,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              //'snapTask',
-              //tyle: TextStyle(fontSize: 43, fontWeight: FontWeight.w500),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Login',
-              style: TextStyle(
-                fontSize: 20,
-                color: stGrey,
+              SizedBox(height: 20),
+              Text(
+                'Login',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: stGrey,
+                ),
               ),
-            ),
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            SizedBox(height: 10),
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await authProvider.login(
-                    context,
-                    _emailController.text,
-                    _passwordController.text,
-                  );
-                  Navigator.pushReplacementNamed(context, '/home');
-                } catch (e) {
-                  print('Erro durante o login: $e');
-                }
-              },
-              child: Text('Login'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: stLightPurple, // cor de fundo do botão
-                minimumSize:
-                    Size(double.infinity, 50), // largura e altura mínimas
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
               ),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register');
-              },
-              child: Text('Registar'),
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                foregroundColor: stDarkerPurple,
-                backgroundColor: Colors.transparent, // cor de fundo do botão
-                minimumSize:
-                    Size(double.infinity, 50), // largura e altura mínimas
+              SizedBox(height: 10),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Senha'),
+                obscureText: true,
               ),
-            ),
-          ],
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await authProvider.login(
+                      context,
+                      _emailController.text,
+                      _passwordController.text,
+                    );
+                    Navigator.pushReplacementNamed(context, '/home');
+                  } catch (e) {
+                    print('Erro durante o login: $e');
+                  }
+                },
+                child: Text('Login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: stLightPurple,
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: Text('Registar'),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  foregroundColor: stDarkerPurple,
+                  backgroundColor: Colors.transparent,
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
+              SizedBox(height: 80),
+            ],
+          ),
         ),
       ),
     );
