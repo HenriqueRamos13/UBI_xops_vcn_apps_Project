@@ -1,59 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'screens/login.dart';
-import 'screens/register.dart';
-import 'screens/home.dart';
-import 'screens/group.dart';
-import 'screens/create_group.dart';
-import 'screens/create_task.dart';
-import 'screens/task.dart';
-import 'providers/auth.dart';
+import '../screens/register.dart';
+import '../screens/login.dart';
+import '../screens/home.dart';
+import '../providers/auth.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  //root
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     return ChangeNotifierProvider<AuthProvider>(
       create: (_) => AuthProvider(),
       child: MaterialApp(
-        title: 'My App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        debugShowCheckedModeBanner: false,
+        title: 'snapTask',
+        //theme: ThemeData,
         home: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            return authProvider.isAuthenticated ? HomeScreen() : LoginScreen();
+          builder: (context, authProvider, __) {
+            return authProvider.isAuthenticated ? Home() : Login();
           },
         ),
         routes: {
-          '/register': (context) => RegisterScreen(),
-          '/login': (context) => LoginScreen(),
-          '/group': (context) => authMiddleware(context, GroupScreen()),
-          '/home': (context) => authMiddleware(context, HomeScreen()),
-          '/create_group': (context) =>
-              authMiddleware(context, CreateGroupScreen()),
-          '/create_task': (context) {
-            final Map<String, dynamic>? args = ModalRoute.of(context)
-                ?.settings
-                .arguments as Map<String, dynamic>?;
-
-            final String groupId =
-                args?['groupId'] ?? ''; // ou qualquer lógica que você precise
-            return authMiddleware(context, CreateTaskScreen(groupId: groupId));
-          },
-          // '/profile': (context) => authMiddleware(context, ProfileScreen()),
-          '/task': (context) {
-            final Map<String, dynamic>? args = ModalRoute.of(context)
-                ?.settings
-                .arguments as Map<String, dynamic>?;
-
-            final String taskId =
-                args?['taskId'] ?? ''; // ou qualquer lógica que você precise
-            return authMiddleware(context, TaskScreen(taskId: taskId));
-          },
+          '/register': (context) => Register(),
+          '/login': (context) => Login(),
+          '/home': (context) => authMiddleware(context, Home()),
         },
       ),
     );
@@ -61,6 +40,6 @@ class MyApp extends StatelessWidget {
 
   Widget authMiddleware(BuildContext context, Widget page) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    return authProvider.isAuthenticated ? page : LoginScreen();
+    return authProvider.isAuthenticated ? page : Login();
   }
 }

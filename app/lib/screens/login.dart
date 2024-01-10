@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app/providers/auth.dart';
-import 'register.dart';
+import '../constants/colors.dart';
 
-class LoginScreen extends StatefulWidget {
+class Login extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _LoginState createState() => _LoginState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -17,16 +17,49 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
-      body: Padding(
+      appBar: _buildAppBar(),
+      body: Container(
+        color: stBGColor,
         padding: EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text('Bem-vindo! Faça login para continuar.'),
+            Image.asset(
+              'assets/images/logo.png',
+              height: 200,
+            ),
+            RichText(
+              text: TextSpan(
+                children: <TextSpan>[
+                  TextSpan(
+                      text: 'snap',
+                      style: TextStyle(
+                        color: stLightPurple,
+                        fontSize: 40,
+                        fontWeight: FontWeight.normal,
+                      )),
+                  TextSpan(
+                    text: 'Task',
+                    style: TextStyle(
+                      color: stDarkerPurple,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              //'snapTask',
+              //tyle: TextStyle(fontSize: 43, fontWeight: FontWeight.w500),
+            ),
             SizedBox(height: 20),
+            Text(
+              'Login',
+              style: TextStyle(
+                fontSize: 20,
+                color: stGrey,
+              ),
+            ),
             TextFormField(
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
@@ -35,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 10),
             TextFormField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(labelText: 'Senha'),
               obscureText: true,
             ),
             SizedBox(height: 20),
@@ -54,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: Text('Login'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, // cor de fundo do botão
+                backgroundColor: stLightPurple, // cor de fundo do botão
                 minimumSize:
                     Size(double.infinity, 50), // largura e altura mínimas
               ),
@@ -64,9 +97,11 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 Navigator.pushNamed(context, '/register');
               },
-              child: Text('Registrar'),
+              child: Text('Registar'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // cor de fundo do botão
+                elevation: 0,
+                foregroundColor: stDarkerPurple,
+                backgroundColor: Colors.transparent, // cor de fundo do botão
                 minimumSize:
                     Size(double.infinity, 50), // largura e altura mínimas
               ),
@@ -76,4 +111,25 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+AppBar _buildAppBar() {
+  return AppBar(
+    backgroundColor: stBGColor,
+    elevation: 0,
+    //title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+    //  Icon(
+    //    Icons.menu,
+    //    color: stBlack,
+    //    size: 30,
+    //  ),
+    //  Container(
+    //    height: 40,
+    //    width: 40,
+    //    child: ClipRRect(
+    //      child: Image.asset('assets/images/verifica.png'),
+    //    ),
+    //  ),
+    //]),
+  );
 }

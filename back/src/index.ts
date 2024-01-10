@@ -71,7 +71,6 @@ server.register(require("./routes/v1/signup"), { prefix: "/v1" });
 server.register(require("./routes/v1/auth"), { prefix: "/v1" });
 server.register(require("./routes/v1/user"), { prefix: "/v1" });
 server.register(require("./routes/v1/task"), { prefix: "/v1" });
-server.register(require("./routes/v1/group"), { prefix: "/v1" });
 
 server.get("/ping", async (request, reply) => {
   server.log.info("log message");

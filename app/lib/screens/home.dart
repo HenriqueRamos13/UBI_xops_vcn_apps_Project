@@ -1,174 +1,303 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import '../providers/auth.dart';
-import 'package:app/models.dart';
 import 'dart:convert';
-import '../constants.dart';
 
-class HomeScreen extends StatefulWidget {
+import '../constants/colors.dart';
+import '../constants/constants.dart';
+import '../model/models.dart';
+import '../providers/auth.dart';
+import '../widgets/task.dart';
+
+class Home extends StatefulWidget {
+  Home({Key? key}) : super(key: key);
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<Home> createState() => _HomeState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  late List<Group> _groups = [];
-  bool _isLoading = true;
+class _HomeState extends State<Home> {
+  final _taskController = TextEditingController();
+  final authProvider = AuthProvider();
+
+  List<TaskModel> _taskList = [];
 
   @override
   void initState() {
     super.initState();
-    _loadGroups();
+    _getTasks();
   }
 
-  Future<void> _loadGroups() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final String? token = await authProvider.getToken();
-
+  Future<void> _getTasks() async {
     try {
-      // Valide se o token está presente
-      if (token == null) {
-        // Adicione uma lógica para lidar com a ausência do token, se necessário
-        return;
-      }
-
-      print('token: $token');
-
-      // Faça a requisição com o token no cabeçalho
+      final token = await authProvider.getToken();
       final response = await http.get(
-        Uri.parse('${Constants.apiUrl}/group'),
-        headers: {'Authorization': 'Bearer $token'},
+        Uri.parse('${Constants.apiUrl}/task'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
 
-      print(response.body);
-
       if (response.statusCode == 200) {
-        // Converta a resposta JSON para uma lista de grupos
         final List<dynamic> data = jsonDecode(response.body);
-
-        print('Type of data: ${data.runtimeType}');
-        if (data is List) {
-          final List<Group> groups =
-              data.map((group) => Group.fromJson(group)).toList();
-
-          setState(() {
-            _groups = groups;
-            _isLoading = false; // Atualize o estado do carregamento
-          });
-        } else {
-          // Trate o caso em que a resposta não é uma lista válida
-          print('Invalid response format');
-        }
-
-        if (data is List) {
-          try {
-            final List<Group> groups = data.map((group) {
-              try {
-                return Group.fromJson(group);
-              } catch (e) {
-                print('Error mapping group: $e');
-                return Group(
-                  id: '',
-                  name: 'Invalid Group',
-                  description: '',
-                  tasks: [],
-                  owner: User(
-                    id: '',
-                    name: '',
-                    email: '',
-                    password: '',
-                  ),
-                );
-              }
-            }).toList();
-
-            setState(() {
-              _groups = groups;
-              _isLoading = false; // Atualize o estado do carregamento
-            });
-          } catch (e) {
-            print('Error mapping groups: $e');
-            // Trate o caso em que a obtenção dos grupos falhou
-            setState(() {
-              _isLoading =
-                  false; // Atualize o estado do carregamento em caso de erro
-            });
-          }
-        } else {
-          // Trate o caso em que a resposta não é uma lista válida
-          print('Invalid response format');
-        }
+        setState(() {
+          _taskList = data.map((task) => TaskModel.fromJson(task)).toList();
+        });
       } else {
-        // Trate o caso em que a obtenção dos grupos falhou
-        print('Failed to load groups');
+        // Handle errors
       }
     } catch (error) {
-      print('Error loading groups: $error');
-      // Trate o erro conforme necessário
-      setState(() {
-        _isLoading = false; // Atualize o estado do carregamento em caso de erro
-      });
+      // Handle errors
+    }
+  }
+
+  Future<void> _addTask(String task) async {
+    try {
+      final token = await authProvider.getToken();
+      final response = await http.post(
+        Uri.parse('${Constants.apiUrl}/task'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'name': task}),
+      );
+
+      if (response.statusCode == 200) {
+        print('Task added');
+        _getTasks();
+        _taskController.clear();
+      } else {
+        print('Task not added');
+        // Handle errors
+      }
+    } catch (error) {
+      print('Task error');
+      // Handle errors
+    }
+  }
+
+  Future<void> _handleTaskChange(TaskModel todo) async {
+    try {
+      final token = await authProvider.getToken();
+      final response = await http.patch(
+        Uri.parse('${Constants.apiUrl}/task/${todo.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'completed': !todo.completed}),
+      );
+
+      if (response.statusCode == 200) {
+        _getTasks();
+      } else {
+        // Handle errors
+      }
+    } catch (error) {
+      // Handle errors
+    }
+  }
+
+  Future<void> _deleteTask(String id) async {
+    try {
+      final token = await authProvider.getToken();
+      final response = await http.delete(
+        Uri.parse('${Constants.apiUrl}/task/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _getTasks();
+      } else {
+        // Handle errors
+      }
+    } catch (error) {
+      // Handle errors
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Groups'),
-        automaticallyImplyLeading: false, // Remova o botão de voltar
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              // Adicionar lógica para recarregar os grupos manualmente
-              _loadGroups();
-            },
+      backgroundColor: stBGColor,
+      appBar: _buildAppBar(),
+      body: Stack(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            child: Column(
+              children: [
+                _searchBox(),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 50, bottom: 20),
+                        child: Text(
+                          'Todas as tarefas',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      for (TaskModel todo in _taskList) _buildTaskItem(todo),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(
+                      bottom: 20,
+                      right: 20,
+                      left: 20,
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.grey,
+                          offset: Offset(0.0, 0.0),
+                          blurRadius: 10.0,
+                          spreadRadius: 0.0,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      controller: _taskController,
+                      decoration: InputDecoration(
+                        hintText: 'Adicionar nova tarefa',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(bottom: 20, right: 20),
+                  child: ElevatedButton(
+                    child: Text(
+                      '+',
+                      style: TextStyle(
+                        fontSize: 40,
+                      ),
+                    ),
+                    onPressed: () {
+                      _addTask(_taskController.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: stLightPurple,
+                      minimumSize: Size(60, 60),
+                      elevation: 10,
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : _groups.isNotEmpty
-              ? ListView.builder(
-                  itemCount: _groups.length,
-                  itemBuilder: (context, index) {
-                    final group = _groups[index];
-                    final int totalTasks = group.tasks.length;
-                    final int completedTasks =
-                        group.tasks.where((task) => task.completed).length;
-                    final double percentageCompleted = totalTasks > 0
-                        ? (completedTasks / totalTasks) * 100
-                        : 0;
+    );
+  }
 
-                    return ListTile(
-                      title: Text(group.name),
-                      subtitle: Text(
-                          'Total tasks: $totalTasks, Completed: $completedTasks, % Completed: ${percentageCompleted.toStringAsFixed(2)}%'),
-                      onTap: () {
-                        // Navegar para a página do grupo passando o ID do grupo
-                        Navigator.pushNamed(
-                          context,
-                          '/group',
-                          arguments: {'groupId': group.id},
-                        );
-                      },
-                    );
-                  },
-                )
-              : Center(
-                  child: Text('No groups available'),
-                ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Adicionar lógica para criar um novo grupo
-          // Por exemplo, navegar para a tela de criação de grupo
-          Navigator.pushNamed(context, '/create_group');
-        },
-        child: Icon(Icons.add),
+  Widget _buildTaskItem(TaskModel todo) {
+    return Task(
+      todo: todo,
+      onTaskChanged: _handleTaskChange,
+      onTaskDeleted: _deleteTask,
+    );
+  }
+
+  Widget _searchBox() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
       ),
+      child: TextField(
+        onChanged: (value) => _searchTask(value),
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.all(0),
+          prefixIcon: Icon(
+            Icons.search,
+            color: stBlack,
+            size: 20,
+          ),
+          prefixIconConstraints: BoxConstraints(
+            maxHeight: 20,
+            minWidth: 25,
+          ),
+          border: InputBorder.none,
+          hintText: 'Pesquisar',
+          hintStyle: TextStyle(color: stGrey),
+        ),
+      ),
+    );
+  }
+
+  void _searchTask(String string) {
+    if (string.isEmpty) {
+      setState(() {
+        _taskList =
+            _taskList; // Reset para a lista completa se a pesquisa estiver vazia
+      });
+    } else {
+      final results = _taskList
+          .where(
+              (task) => task.name.toLowerCase().contains(string.toLowerCase()))
+          .toList();
+
+      setState(() {
+        _taskList = results;
+      });
+    }
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      titleSpacing: 100,
+      title: RichText(
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+                text: 'snap',
+                style: TextStyle(
+                  color: stLightPurple,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                )),
+            TextSpan(
+              text: 'Task',
+              style: TextStyle(
+                color: stDarkerPurple,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        //'snapTask',
+        //tyle: TextStyle(fontSize: 43, fontWeight: FontWeight.w500),
+      ),
+      backgroundColor: stBGColor,
+      elevation: 0,
+      foregroundColor: stDarkerPurple,
     );
   }
 }

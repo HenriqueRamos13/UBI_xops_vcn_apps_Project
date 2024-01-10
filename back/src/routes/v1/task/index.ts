@@ -11,12 +11,8 @@ type RequestGetOne = FastifyRequest<{
 }>;
 
 type RequestPost = FastifyRequest<{
-  Params: {
-    group: string;
-  };
   Body: {
     name: string;
-    description: string;
   };
 }>;
 
@@ -26,7 +22,6 @@ type RequestPatch = FastifyRequest<{
   };
   Body: {
     name?: string;
-    description?: string;
     status?: "TODO" | "DOING" | "DONE";
     completed?: boolean;
   };
@@ -66,19 +61,9 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
 
     reply.send(task);
   });
-  fastify.post("/task/:group", async (request: RequestPost, reply) => {
+  fastify.post("/task", async (request: RequestPost, reply) => {
     if (!(await request.isAuthenticated())) {
       reply.code(401).send({ message: "Unauthorized" });
-      return;
-    }
-
-    const group = DB.groups.find(
-      (group) =>
-        group.id === request.params.group && group.owner === request.user.id
-    );
-
-    if (!group) {
-      reply.code(404).send({ error: "Group not found" });
       return;
     }
 
@@ -91,15 +76,6 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
     } as Task;
 
     DB.tasks.push(newTask);
-
-    DB.groups = DB.groups.map((group) =>
-      group.id === request.params.group
-        ? {
-            ...group,
-            tasks: [...group.tasks, newTask],
-          }
-        : group
-    );
 
     reply.send(newTask);
   });
@@ -127,19 +103,6 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
       task.id === request.params.id ? updatedTask : task
     );
 
-    DB.groups = DB.groups.map((group) => {
-      if (group.owner === request.user.id) {
-        return {
-          ...group,
-          tasks: group.tasks.map((task) =>
-            task.id === request.params.id ? updatedTask : task
-          ),
-        };
-      }
-
-      return group;
-    });
-
     reply.send(updatedTask);
   });
   fastify.delete("/task/:id", async (request: RequestDelete, reply) => {
@@ -158,17 +121,6 @@ export default function (fastify: FastifyInstance, opts: any, done: any) {
     }
 
     DB.tasks = DB.tasks.filter((task) => task.id !== request.params.id);
-
-    DB.groups = DB.groups.map((group) => {
-      if (group.owner === request.user.id) {
-        return {
-          ...group,
-          tasks: group.tasks.filter((task) => task.id !== request.params.id),
-        };
-      }
-
-      return group;
-    });
 
     reply.send(task);
   });
