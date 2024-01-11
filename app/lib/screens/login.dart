@@ -11,6 +11,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String errorMessage = ''; // Add this variable to hold the error message
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +83,11 @@ class _LoginState extends State<Login> {
                     );
                     Navigator.pushReplacementNamed(context, '/home');
                   } catch (e) {
-                    print('Erro durante o login: $e');
+                    setState(() {
+                      // Update the error message
+                      errorMessage = 'Email ou palavra-passe incorretos.';
+                    });
+                    print(errorMessage);
                   }
                 },
                 child: Text('Login'),
@@ -104,7 +109,17 @@ class _LoginState extends State<Login> {
                   minimumSize: Size(double.infinity, 50),
                 ),
               ),
-              SizedBox(height: 80),
+              SizedBox(height: 10),
+              if (errorMessage
+                  .isNotEmpty) // Display the error message if it is not empty
+                Text(
+                  errorMessage,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                  ),
+                ),
+              SizedBox(height: 70),
             ],
           ),
         ),

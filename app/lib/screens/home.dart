@@ -7,6 +7,7 @@ import '../constants/constants.dart';
 import '../model/models.dart';
 import '../providers/auth.dart';
 import '../widgets/task.dart';
+import '../db/db-helper.dart';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final _taskController = TextEditingController();
   final authProvider = AuthProvider();
+  final dbHelper = DatabaseHelper.instance;
 
   List<TaskModel> _taskList = [];
 
@@ -299,6 +301,12 @@ class _HomeState extends State<Home> {
       backgroundColor: stBGColor,
       elevation: 0,
       foregroundColor: stDarkerPurple,
+      leading: IconButton(
+        icon: Icon(Icons.power_settings_new),
+        onPressed: () async {
+          await authProvider.logout(context);
+        },
+      ),
     );
   }
 }

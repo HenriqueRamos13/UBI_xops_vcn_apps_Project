@@ -22,7 +22,7 @@ class UserModel {
 }
 
 class TaskModel {
-  final String id;
+  String id;
   final String name;
   final String? description;
   final String status;
@@ -47,5 +47,15 @@ class TaskModel {
       completed: json['completed'] ?? false,
       owner: json['owner'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'status': status,
+      'completed': completed ? 1 : 0,
+      'owner': owner,
+    };
   }
 }

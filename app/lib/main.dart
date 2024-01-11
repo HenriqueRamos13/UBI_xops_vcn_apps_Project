@@ -5,8 +5,15 @@ import '../screens/register.dart';
 import '../screens/login.dart';
 import '../screens/home.dart';
 import '../providers/auth.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+import '../db/db-helper.dart';
 
-void main() {
+void main() async {
+  final database = openDatabase(
+    join(await getDatabasesPath(), 'tasks.db'),
+  );
+
   runApp(const MyApp());
 }
 
