@@ -6,21 +6,21 @@ import '../screens/login.dart';
 import '../screens/home.dart';
 import '../providers/auth.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import '../db/db-helper.dart';
+import 'providers/conectivity.dart';
+import 'widgets/noInternetConnection.dart';
 
 void main() async {
-  final database = openDatabase(
-    join(await getDatabasesPath(), 'tasks.db'),
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ConnectivityService(),
+      child: const MyApp(),
+    ),
   );
-
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  //root
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -34,9 +34,12 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'snapTask',
-        //theme: ThemeData,
-        home: Consumer<AuthProvider>(
-          builder: (context, authProvider, __) {
+        home: Consumer2<AuthProvider, ConnectivityService>(
+          builder: (context, authProvider, connectivity, __) {
+            if (!connectivity.isConnected) {
+              return const NoInternetConnectionWidget();
+            }
+
             return authProvider.isAuthenticated ? Home() : Login();
           },
         ),
